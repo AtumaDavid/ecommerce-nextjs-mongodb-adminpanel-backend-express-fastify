@@ -1,4 +1,70 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
+
+const variationSchema = new mongoose.Schema({
+  color: {
+    type: "string",
+  },
+  size: {
+    type: "string",
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  sku: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  quantityAvailable: {
+    type: Number,
+    required: true,
+  },
+});
+
+const offerSchema = new mongoose.Schema({
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  discountPercentage: { type: Number, required: true },
+  flashSale: { type: Boolean, required: true },
+});
+
+const seoSchema = new mongoose.Schema({
+  metaTitle: { type: String },
+  metaDescription: { type: String },
+  metaKeywords: { type: String },
+  metaImage: { type: String },
+});
+
+const shippingReturnSchema = new mongoose.Schema({
+  shippingType: {
+    type: String,
+    enum: ["free", "Flat Rate"],
+    required: true,
+  },
+  shippingCost: {
+    type: Number,
+    required: true,
+  },
+  isProductQuantity: {
+    type: Boolean,
+    required: true,
+  },
+  returnPolicy: {
+    type: String,
+  },
+});
+
+const videoSchema = new mongoose.Schema({
+  videoProvider: {
+    type: String,
+    required: true,
+  },
+  videoLink: {
+    type: String,
+    required: true,
+  },
+});
 
 const productSchema = new mongoose.Schema(
   {
@@ -26,6 +92,10 @@ const productSchema = new mongoose.Schema(
         required: true,
       },
     },
+    // categoryInfo: {
+    //   type: String,
+    //   required: true,
+    // },
     barcode: {
       type: String,
       enum: ["EAN-13", "UPC-A"],
