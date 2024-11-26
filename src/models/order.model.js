@@ -74,6 +74,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     orderDate: {
       type: Date,
       default: Date.now(),
