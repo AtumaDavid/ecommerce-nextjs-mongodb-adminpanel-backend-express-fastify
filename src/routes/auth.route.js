@@ -4,7 +4,7 @@ import crypto from "crypto";
 export default async function authRoutes(fastify, options) {
   // USER REGISTRATION
   fastify.post("/api/register", async (request, response) => {
-    const { name, email, password, mobile } = request.body;
+    const { name, email, password } = request.body;
     const userExist = await User.findOne({ email });
 
     if (userExist) {
@@ -13,7 +13,7 @@ export default async function authRoutes(fastify, options) {
         .send({ status: false, msg: "User Already Exists" });
     }
 
-    const newUser = new User({ name, email, password, mobile });
+    const newUser = new User({ name, email, password });
     await newUser.save();
     response.send({ status: true, msg: "User registered successfully" });
   });

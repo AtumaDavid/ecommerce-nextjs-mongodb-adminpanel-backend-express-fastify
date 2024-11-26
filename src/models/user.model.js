@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -13,7 +13,7 @@ const addressSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  mobile: { type: String, required: true, unique: true },
+  // mobile: { type: String, required: true, unique: true },
   role: { type: String, enum: ["customer", "admin"], default: "customer" },
   password: { type: String, required: true },
   resetPasswordToken: { type: String },
