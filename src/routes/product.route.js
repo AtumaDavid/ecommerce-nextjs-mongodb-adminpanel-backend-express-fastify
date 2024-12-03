@@ -4,7 +4,10 @@ export default async function productRoutes(fastify, options) {
   // CREATE A PRODUCT
   fastify.post("/api/products", async (request, response) => {
     try {
+      // console.log(request.body);
       const product = new Product(request.body);
+      //   const product = new Product.create(request.body);
+      //   console.log(product);
       await product.save();
       response.code(200).send({
         status: true,
@@ -15,14 +18,54 @@ export default async function productRoutes(fastify, options) {
       response.code(500).send({
         status: false,
         msg: "Something went wrong",
+        error: error,
       });
     }
   });
+  //   fastify.post("/api/products", async (request, response) => {
+  //     try {
+  //       console.log(request.body);
+
+  //       // Validate variations
+  //       if (request.body.variations) {
+  //         const skus = new Set();
+  //         for (const variation of request.body.variations) {
+  //           if (!variation.sku) {
+  //             return response.code(400).send({
+  //               status: false,
+  //               msg: "Variation SKU is required.",
+  //             });
+  //           }
+  //           if (skus.has(variation.sku)) {
+  //             return response.code(400).send({
+  //               status: false,
+  //               msg: `Duplicate SKU found: ${variation.sku}`,
+  //             });
+  //           }
+  //           skus.add(variation.sku);
+  //         }
+  //       }
+
+  //       const product = new Product(request.body);
+  //       await product.save();
+  //       response.code(200).send({
+  //         status: true,
+  //         msg: "Product saved successfully",
+  //         data: product,
+  //       });
+  //     } catch (error) {
+  //       response.code(500).send({
+  //         status: false,
+  //         msg: "Something went wrong",
+  //         error: error,
+  //       });
+  //     }
+  //   });
 
   //   FETCH ALL PRODUCTS
   fastify.get("/api/products", async (request, response) => {
     try {
-      const products = await Product.find();
+      const products = await Product.find().sort({ createdAt: -1 });
       response.code(200).send({
         status: true,
         msg: "Product fetched successfully",
@@ -67,6 +110,7 @@ export default async function productRoutes(fastify, options) {
       const product = await Product.findByIdAndUpdate(id, request.body, {
         new: true,
       });
+      console.log(product);
 
       if (!product) {
         return response.code(404).send({
@@ -84,6 +128,7 @@ export default async function productRoutes(fastify, options) {
         status: false,
         msg: "Something went wrong",
       });
+      alert("Failed to update product");
     }
   });
 

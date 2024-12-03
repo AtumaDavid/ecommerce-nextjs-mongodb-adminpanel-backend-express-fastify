@@ -11,11 +11,11 @@ const variationSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  sku: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  // sku: {
+  //   type: String,
+  //   // required: true,
+  //   // unique: true,
+  // },
   quantityAvailable: {
     type: Number,
     required: true,
@@ -72,11 +72,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    sku: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    // sku: {
+    //   type: String,
+    //   // required: true,
+    //   // unique: true,
+    // },
     categoryInfo: {
       gender: {
         type: String,
@@ -101,11 +101,13 @@ const productSchema = new mongoose.Schema(
       enum: ["EAN-13", "UPC-A"],
     },
     buyingPrice: {
-      type: Number,
+      // type: Number,
+      type: String,
       required: true,
     },
     sellingPrice: {
-      type: Number,
+      // type: Number,
+      type: String,
       required: true,
     },
     tax: {
@@ -119,24 +121,29 @@ const productSchema = new mongoose.Schema(
       default: "Active",
     },
     canPurchasable: {
-      type: Boolean,
-      default: true,
+      // type: Boolean,
+      // default: true,
+      type: String,
     },
     showStockOut: {
-      type: Boolean,
-      default: true,
+      // type: Boolean,
+      // default: true,
+      type: String,
     },
     refundable: {
-      type: Boolean,
-      default: true,
+      // type: Boolean,
+      // default: true,
+      type: String,
     },
     maxPurchaseQuantity: {
-      type: Number,
+      // type: Number,
+      type: String,
       // default: 1,
       required: true,
     },
     lowStockWarning: {
-      type: Number,
+      // type: Number,
+      type: String,
       // default: 0,
       required: true,
     },
@@ -154,7 +161,7 @@ const productSchema = new mongoose.Schema(
       },
     ],
     description: {
-      type: String,
+      type: [String],
     },
     images: {
       type: String,

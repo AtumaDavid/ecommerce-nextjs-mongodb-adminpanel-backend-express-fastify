@@ -22,10 +22,10 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  sku: {
-    type: String,
-    required: true,
-  },
+  // sku: {
+  //   type: String,
+  //   required: true,
+  // },
 });
 
 const addressSchema = new mongoose.Schema({
