@@ -29,11 +29,34 @@ const offerSchema = new mongoose.Schema({
   flashSale: { type: Boolean, required: true },
 });
 
+// const seoSchema = new mongoose.Schema({
+//   metaTitle: { type: String },
+//   metaDescription: { type: String },
+//   metaKeywords: { type: String },
+//   metaImage: { type: String },
+// });
+
 const seoSchema = new mongoose.Schema({
-  metaTitle: { type: String },
-  metaDescription: { type: String },
-  metaKeywords: { type: String },
-  metaImage: { type: String },
+  metaTitle: {
+    type: String,
+    required: true,
+  },
+  metaDescription: {
+    type: String,
+    required: true,
+  },
+  metaKeywords: {
+    type: [String],
+    required: true,
+  },
+  metaImage: {
+    type: String,
+  },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
 });
 
 const shippingReturnSchema = new mongoose.Schema({
@@ -163,8 +186,19 @@ const productSchema = new mongoose.Schema(
     description: {
       type: [String],
     },
+
     images: {
-      type: String,
+      type: [String],
+      validate: {
+        validator: function (v) {
+          // Validate each image URL
+          return v.every(
+            (img) => img && (img.startsWith("http") || img.startsWith("https"))
+          );
+        },
+        message: (props) => `Invalid image URL in ${props.value}!`,
+      },
+      default: [],
     },
     videos: [videoSchema],
     offer: offerSchema,

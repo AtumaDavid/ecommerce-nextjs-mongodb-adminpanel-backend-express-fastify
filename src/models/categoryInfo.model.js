@@ -1,39 +1,42 @@
 import mongoose from "mongoose";
 
-const categoryInfoSchema = new mongoose.Schema(
+const SubcategorySchema = new mongoose.Schema({
+  id: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: mongoose.Types.ObjectId,
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+});
+
+const CategoryInfoSchema = new mongoose.Schema(
   {
     gender: {
       type: String,
-      enum: ["men", "women", "juniors"],
       required: true,
+      enum: ["men", "women", "juniors"],
     },
     category: {
       type: String,
       required: true,
+      trim: true,
     },
-    subcategory: {
+    categoryImage: {
       type: String,
       required: true,
     },
-
-    // isActive: {
-    //   type: Boolean,
-    //   default: true,
-    // },
-    // image: {
-    //   type: String,
-    // },
-    // slug: {
-    //   type: String,
-    //   unique: true,
-    //   required: true,
-    // },
+    subcategories: [SubcategorySchema],
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// Create indexes for better query performance
-// categoryInfoSchema.index({ gender: 1, category: 1, subcategory: 1 });
-// categoryInfoSchema.index({ slug: 1 });
-
-export const CategoryInfo = mongoose.model("CategoryInfo", categoryInfoSchema);
+export const CategoryInfo = mongoose.model("CategoryInfo", CategoryInfoSchema);
