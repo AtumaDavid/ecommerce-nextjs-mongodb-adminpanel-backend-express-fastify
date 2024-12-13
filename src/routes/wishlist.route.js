@@ -24,29 +24,29 @@ export default async function wishListRoutes(fastify, options) {
         let userWishlist = await Wishlist.findOne({ user });
 
         if (!userWishlist) {
-          // Create new wishlist for user if not exists
+          // Create new wishlist if it doesn't exist
           userWishlist = new Wishlist({
-            user,
-            items: [],
+            user: user,
+            items: [{ product: product }],
           });
+        } else {
+          // Check if product already in wishlist
+          const productExists = userWishlist.items.some(
+            (item) => item.product.toString() === product
+          );
+
+          if (productExists) {
+            return reply.code(400).send({
+              status: false,
+              msg: "Product already in wishlist",
+            });
+          }
+
+          // Add product to wishlist items
+          userWishlist.items.push({ product: product });
         }
 
-        // Check if product already in wishlist
-        const isProductInWishlist = userWishlist.items.some(
-          (item) => item.product.toString() === product
-        );
-
-        if (isProductInWishlist) {
-          return reply.code(400).send({
-            status: false,
-            msg: "Product already in wishlist",
-          });
-        }
-
-        // Add product to wishlist
-        userWishlist.items.push({ product });
-
-        // Save wishlist
+        // Save the wishlist
         await userWishlist.save();
 
         return reply.code(200).send({
@@ -64,7 +64,7 @@ export default async function wishListRoutes(fastify, options) {
       }
     }
   );
-
+  // Get user's wishlist
   // Get user's wishlist
   fastify.get(
     "/api/wishlist",
@@ -76,7 +76,7 @@ export default async function wishListRoutes(fastify, options) {
         const userWishlist = await Wishlist.findOne({ user })
           .populate({
             path: "items.product",
-            select: "name price images slug", // Specify fields to populate
+            select: "name sellingPrice images slug", // Specify fields to populate
           })
           .sort({ "items.addedAt": -1 }); // Sort by most recent
 
@@ -98,35 +98,29 @@ export default async function wishListRoutes(fastify, options) {
 
   // Remove product from wishlist
   fastify.delete(
-    "/api/wishlist/:productId",
+    "/api/wishlist/:productId", // Change to route parameter
     { preValidation: [fastify.authenticate] },
     async (request, reply) => {
       try {
-        const { productId } = request.params;
+        const { productId } = request.params; // Use params, not body
         const user = request.user?.userId;
 
-        // Find user's wishlist and remove the specific product
-        const updatedWishlist = await Wishlist.findOneAndUpdate(
-          { user },
-          {
-            $pull: {
-              items: { product: productId },
-            },
-          },
-          { new: true }
-        );
+        const removedItem = await Wishlist.findOneAndDelete({
+          user: user,
+          product: productId,
+        });
 
-        if (!updatedWishlist) {
+        if (!removedItem) {
           return reply.code(404).send({
             status: false,
-            msg: "Wishlist not found or product not in wishlist",
+            msg: "Product not found in wishlist",
           });
         }
 
         return reply.code(200).send({
           status: true,
           msg: "Product removed from wishlist successfully",
-          data: updatedWishlist,
+          data: removedItem,
         });
       } catch (error) {
         console.error("Wishlist removal error:", error);
@@ -145,27 +139,25 @@ export default async function wishListRoutes(fastify, options) {
     { preValidation: [fastify.authenticate] },
     async (request, reply) => {
       try {
+        // const { user } = request.params;
         const user = request.user?.userId;
 
-        // Clear all items from user's wishlist
-        const updatedWishlist = await Wishlist.findOneAndUpdate(
-          { user },
-          { items: [] },
-          { new: true }
-        );
-
-        if (!updatedWishlist) {
-          return reply.code(404).send({
+        // Validate user is provided
+        if (!user) {
+          return reply.code(400).send({
             status: false,
-            msg: "Wishlist not found",
+            msg: "User ID is required",
           });
         }
+
+        // Delete all wishlist items for the user
+        const deleteResult = await Wishlist.deleteMany({ user: user });
 
         return reply.code(200).send({
           status: true,
           msg: "Wishlist cleared successfully",
           data: {
-            deletedCount: updatedWishlist.items.length,
+            deletedCount: deleteResult.deletedCount,
           },
         });
       } catch (error) {
@@ -179,7 +171,7 @@ export default async function wishListRoutes(fastify, options) {
     }
   );
 
-  // Check if product is in wishlist
+  //   // Check if product is in wishlist
   fastify.get(
     "/api/wishlist/check/:productId",
     { preValidation: [fastify.authenticate] },
@@ -188,16 +180,15 @@ export default async function wishListRoutes(fastify, options) {
         const { productId } = request.params;
         const user = request.user?.userId;
 
-        const wishlist = await Wishlist.findOne({ user });
-
-        const inWishlist = wishlist?.items.some(
-          (item) => item.product.toString() === productId
-        );
+        const wishlistItem = await Wishlist.findOne({
+          user: user,
+          product: productId,
+        });
 
         return reply.code(200).send({
           status: true,
           msg: "Wishlist check completed",
-          inWishlist: !!inWishlist,
+          inWishlist: !!wishlistItem,
         });
       } catch (error) {
         console.error("Wishlist check error:", error);
