@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import { Product } from "../models/product.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -11,6 +12,9 @@ function extractPublicIdFromUrl(url) {
 export default async function productRoutes(fastify, options) {
   fastify.post("/api/products", async (request, response) => {
     try {
+      if (request.body.name) {
+        request.body.slug = slugify(request.body.name.toLowerCase());
+      }
       // Create a copy of the request body to avoid modifying the original
       const productData = { ...request.body };
 
@@ -113,10 +117,36 @@ export default async function productRoutes(fastify, options) {
       });
     }
   });
+  //   FETCH A SINGLE PRODUCT BY SLUG
+  fastify.get("/api/products/:slug/byslug", async (request, response) => {
+    try {
+      const slug = request.params.slug;
+      const product = await Product.findOne({ slug: slug });
+      if (!product) {
+        return response.code(404).send({
+          status: false,
+          msg: "Product not found",
+        });
+      }
+      response.code(200).send({
+        status: true,
+        msg: "Product fetched successfully",
+        data: product,
+      });
+    } catch (error) {
+      response.code(500).send({
+        status: false,
+        msg: "Something went wrong",
+      });
+    }
+  });
 
   //   UPDATE A SINGLE PRODUCT BY ID
   fastify.put("/api/products/:id", async (request, response) => {
     try {
+      if (request.body.name) {
+        request.body.slug = slugify(request.body.name.toLowerCase());
+      }
       const id = request.params.id;
       const updateData = request.body;
 
@@ -248,6 +278,7 @@ export default async function productRoutes(fastify, options) {
     }
   });
 
+  // FLASH SALE
   fastify.get("/api/products/flash-sales", async (request, response) => {
     try {
       const currentDate = new Date();

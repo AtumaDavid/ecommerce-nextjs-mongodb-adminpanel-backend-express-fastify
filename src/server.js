@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import uploadRoutes from "./routes/upload.route.js";
 import multipart from "@fastify/multipart";
+import wishListRoutes from "./routes/wishlist.route.js";
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ fastify.register(productRoutes);
 fastify.register(orderRoutes);
 fastify.register(uploadRoutes);
 fastify.register(categoryRoutes);
+fastify.register(wishListRoutes);
 
 const start = async () => {
   await startDb();

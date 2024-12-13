@@ -9,3 +9,4 @@
 - npm install fastify @fastify/multipart [for cloudinary]
 - cloudinary
 - dotenv
+- npm i slugify
