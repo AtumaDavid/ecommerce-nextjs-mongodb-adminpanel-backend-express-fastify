@@ -1,6 +1,8 @@
 import slugify from "slugify";
 import { Product } from "../models/product.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
+import { Wishlist } from "../models/wishlist.model.js";
 
 // Utility function to extract public ID from Cloudinary URL
 function extractPublicIdFromUrl(url) {
@@ -200,6 +202,14 @@ export default async function productRoutes(fastify, options) {
     try {
       const id = request.params.id;
 
+      // Validate the ID format
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return response.code(400).send({
+          status: false,
+          msg: "Invalid product ID",
+        });
+      }
+
       // Find the product to get the image URL
       const product = await Product.findById(id);
       if (!product) {
@@ -222,7 +232,20 @@ export default async function productRoutes(fastify, options) {
       }
 
       // Delete the product from the database
-      await Product.findByIdAndDelete(id);
+      // await Product.findByIdAndDelete(id);
+      const deletedProduct = await Product.findByIdAndDelete(id);
+      if (!deletedProduct) {
+        return response.code(500).send({
+          status: false,
+          msg: "Failed to delete product",
+        });
+      }
+
+      // Remove the product from all wishlists
+      await Wishlist.updateMany(
+        { "items.product": id },
+        { $pull: { items: { product: id } } }
+      );
 
       response.code(200).send({
         status: true,
