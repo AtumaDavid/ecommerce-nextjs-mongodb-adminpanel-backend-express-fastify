@@ -13,12 +13,6 @@ const cartItemSchema = new mongoose.Schema(
       default: null,
     },
     quantity: { type: Number, required: true, min: 1 },
-    // // Optional: Add more details for better tracking
-    // selectedVariation: {
-    //   color: { type: String },
-    //   size: { type: String },
-    //   price: { type: Number },
-    // },
   },
   { _id: false }
 ); // Disable creating separate _id for subdocuments
@@ -29,7 +23,7 @@ const CartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
+      // unique: true,
     },
     items: [cartItemSchema],
     // Optional: Add metadata
@@ -47,19 +41,19 @@ const CartSchema = new mongoose.Schema(
     // Add a pre-save hook to update metadata
     // (runs automatically before the document is saved to the database)
     // Automatically calculates the total number of items in the cart
-    hooks: {
-      pre: {
-        save: function (next) {
-          // 'this' refers to the current cart document
-          this.totalItems = this.items.reduce(
-            // Reduce method to sum up quantities
-            (total, item) => total + item.quantity,
-            0 // Initial value of total is 0
-          );
-          next();
-        },
-      },
-    },
+    // hooks: {
+    //   pre: {
+    //     save: function (next) {
+    //       // 'this' refers to the current cart document
+    //       this.totalItems = this.items.reduce(
+    //         // Reduce method to sum up quantities
+    //         (total, item) => total + item.quantity,
+    //         0 // Initial value of total is 0
+    //       );
+    //       next();
+    //     },
+    //   },
+    // },
   }
 );
 
@@ -98,38 +92,36 @@ CartSchema.methods.addOrUpdateItem = function (
   quantity,
   variationId = null
 ) {
-  const existingItemIndex = this.items.findIndex(
+  const itemIndex = this.items.findIndex(
     (item) =>
       item.productId.toString() === productId &&
-      (item.variationId?.toString() || null) === variationId
+      (item.variationId?.toString() || null) === (variationId || null)
   );
 
-  if (existingItemIndex > -1) {
+  if (itemIndex > -1) {
     // Update existing item
-    this.items[existingItemIndex].quantity += quantity;
+    this.items[itemIndex].quantity = quantity; // Direct assignment instead of addition
   } else {
     // Add new item
     this.items.push({
       productId,
       quantity,
-      variationId,
+      variationId: variationId || null,
     });
   }
-
-  return this;
 };
 
 // Add a method to remove an item
-CartSchema.methods.removeItem = function (productId, variationId = null) {
-  this.items = this.items.filter(
-    (item) =>
-      !(
-        item.productId.toString() === productId &&
-        (item.variationId?.toString() || null) === variationId
-      )
-  );
+// CartSchema.methods.removeItem = function (productId, variationId = null) {
+//   this.items = this.items.filter(
+//     (item) =>
+//       !(
+//         item.productId.toString() === productId &&
+//         (item.variationId?.toString() || null) === variationId
+//       )
+//   );
 
-  return this;
-};
+//   return this;
+// };
 
 export const Cart = mongoose.model("Cart", CartSchema);
