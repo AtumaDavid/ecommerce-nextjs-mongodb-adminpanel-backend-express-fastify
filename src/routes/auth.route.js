@@ -106,6 +106,26 @@ export default async function authRoutes(fastify, options) {
     response.status(200).send({ status: true, msg: "User found", user: user });
   });
 
+  // UPDATE
+  fastify.put(
+    "/api/users",
+    { preValidation: [fastify.authenticate] },
+    async (request, response) => {
+      const id = request.user?.userId;
+      const user = await User.findByIdAndUpdate(id, request.body, {
+        new: true,
+      });
+      if (!user) {
+        return response
+          .status(400)
+          .send({ status: false, msg: "User not found" });
+      }
+      response
+        .status(200)
+        .send({ status: true, msg: "User found", user: user });
+    }
+  );
+
   //   DELETE A USER
   fastify.delete("/api/users/:id", async (request, response) => {
     const { id } = request.params;
